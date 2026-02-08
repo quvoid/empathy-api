@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: empathy-sdk
+Version: 0.1.0
+Summary: Client SDK for Empathy API - Human-friendly error messages
+Author: Your Name
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: requests>=2.25.0
+Dynamic: author
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: summary
