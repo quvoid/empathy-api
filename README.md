@@ -69,3 +69,37 @@ curl -X POST http://localhost:8000/translate \
 | `raw_message` | string | **Required**. The technical error (e.g., stack trace). |
 | `user_context`| string | Optional. What the user was doing (e.g., "Uploading file"). |
 | `tone` | string | Optional. `helpful`, `professional`, `friendly`, `witty`. |
+
+## 🚀 Deployment & Shipping
+
+### 1. Run with Docker (Easiest)
+You can run the API server anywhere Docker is installed (AWS, DigitalOcean, local).
+
+**Using Docker Compose:**
+```bash
+# 1. Add your key to .env
+echo "GEMINI_API_KEY=your_key" > .env
+
+# 2. Run
+docker-compose up -d
+```
+
+**Build Manually:**
+```bash
+docker build -t empathy-api .
+docker run -p 8000:8000 -e GEMINI_API_KEY=your_key empathy-api
+```
+
+### 2. Publish SDK to PyPI
+To let others `pip install empathy-sdk`, you need to publish the package:
+
+```bash
+# Install build tools
+pip install twine build
+
+# Build the package
+python -m build sdk/python
+
+# Upload to PyPI (requires account)
+twine upload sdk/python/dist/*
+```
