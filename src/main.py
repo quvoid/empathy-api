@@ -1,56 +1,34 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.core.config import get_settings
-from src.models.schemas import TranslateRequest, TranslateResponse
-from src.services.translator import get_translator_service
 
-settings = get_settings()
-
-app = FastAPI(
-    title=settings.app_name,
-    description="Translate technical errors into human-friendly messages.",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
-
-# CORS middleware for browser clients
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from src.core.config import get_config
+from src.api.routes import translate, health
 
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy", "service": settings.app_name}
+def create_app() -> FastAPI:
+    """Application factory."""
+    config = get_config()
 
+    app = FastAPI(
+        title=config.APP_NAME,
+        debug=config.DEBUG,
+        docs_url="/docs",
+        redoc_url="/redoc",
+    )
 
-@app.post("/translate", response_model=TranslateResponse)
-async def translate_error(request: TranslateRequest):
-    """
-    Translate a technical error into a user-friendly message.
+    # Middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-    - **raw_message**: The technical error string (required)
-    - **error_code**: Optional application-specific error code
-    - **user_context**: What the user was doing when the error occurred
-    - **tone**: Desired tone (helpful, professional, friendly, witty)
-    """
-    try:
-        service = get_translator_service()
-        return service.translate(request)
-    except Exception as e:
-        # Even our error handler has a friendly error!
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "title": "Translation Failed",
-                "message": "We couldn't process your error message right now.",
-                "action": "Please try again in a moment.",
-                "severity": "error",
-            },
-        )
+    # Routers
+    app.include_router(health.router, tags=["Health"])
+    app.include_router(translate.router, tags=["Translation"])
+
+    return app
+
+app = create_app()
